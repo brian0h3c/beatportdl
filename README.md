@@ -6,6 +6,60 @@ Beatport & Beatsource downloader (FLAC, AAC)
 
 ![Screenshot](/screenshots/main.png?raw=true "Screenshot")
 
+What's new in this fork
+---
+This fork keeps BeatportDL's behaviour and configuration **identical**, while making it far easier to build and trimming the codebase:
+
+- **No CGO, no C toolchain.** Audio tagging now uses [go-taglib](https://github.com/sentriz/go-taglib) — the real [TagLib](https://taglib.org/) library compiled to WebAssembly and run via [wazero](https://github.com/tetratelabs/wazero) — instead of CGO bindings. You no longer need TagLib, zlib or the Zig toolchain installed: `go build` and cross-compilation are pure Go. Tags are still produced by TagLib, so files are tagged exactly as before.
+- **One-command cross-compilation.** The Makefile is now plain `GOOS`/`GOARCH` builds — a single `make` produces binaries for macOS, Linux and Windows with no per-platform C library paths.
+- **Leaner download code.** The chart, playlist and artist download paths shared a lot of duplicated logic; they now run through a single shared helper (~165 fewer lines), which keeps behaviour consistent across link types and reduces the surface for bugs.
+
+> **Requirements changed:** building now needs **Go 1.25+**. The advanced M4A `_raw` tag option now goes through TagLib's standard property mapping; the default config doesn't use it, so most setups are unaffected.
+
+Building & testing
+---
+> **Prerequisites:** [Go 1.25+](https://go.dev/dl/), and an active [Beatport](https://stream.beatport.com/)/[Beatsource](https://stream.beatsource.com/) plan. [ffmpeg](https://www.ffmpeg.org/download.html) is only needed for the `medium-hls` quality option.
+
+**1. Clone this branch and build**
+```shell
+git clone -b simplify/dedup-and-drop-cgo https://github.com/brian0h3c/beatportdl.git
+cd beatportdl
+go build ./cmd/beatportdl          # produces ./beatportdl
+```
+No TagLib/zlib/Zig install required. To prove there's no hidden C dependency, build with CGO disabled:
+```shell
+CGO_ENABLED=0 go build ./cmd/beatportdl
+```
+To build every release binary (output in `./bin`), run `make` — see [Building](#building).
+
+**2. First run — create the config**
+
+Run it once and answer the prompts (username, password, downloads directory, quality). This writes `beatportdl-config.yml`, and on a successful login `beatportdl-credentials.json`:
+```shell
+./beatportdl
+```
+
+**3. Download something**
+
+Pass one or more URLs as arguments:
+```shell
+./beatportdl https://www.beatport.com/track/strobe/1696999
+```
+or run `./beatportdl` with no arguments and type a search query when prompted (add `@beatsource` to search Beatsource instead):
+```shell
+./beatportdl
+Enter url or search query: deadmau5 strobe
+```
+Tracks, releases, playlists, charts, labels and artists are all supported — just paste the URL. Set `sort_by_context: true` in the config to group downloads into per-release/playlist/chart folders.
+
+**4. Verify the tags and cover art**
+
+Open a downloaded file in your player or DJ software and confirm the metadata and artwork look correct. You can also inspect it from the terminal:
+```shell
+ffprobe -hide_banner "your-downloaded-track.flac"   # shows tags + the attached cover stream
+```
+FLAC, AAC/M4A and `medium-hls` downloads should all be tagged correctly — artist, title, album, BPM, key, ISRC, label and embedded artwork included.
+
 Setup
 ---
 1. [Download](https://github.com/unspok3n/beatportdl/releases/) or [build](#building) BeatportDL.
@@ -121,6 +175,8 @@ tag_mappings:
 As you can see, each key here represents a predefined value from either a release or a track that you can use to customize what is written to which tags. When you add an entry in the mappings for any format (for e.g., `flac`), only the tags that you specify will be written.
 
 All tags by default are converted to uppercase, but since some M4A players might not recognize it, you can write the tag in lowercase and add the `_raw` suffix to bypass the conversion. *(This applies to M4A tags only)*
+
+> **Fork note:** tags are now written by the bundled WebAssembly TagLib, which applies its own property mapping. The `_raw` suffix is still accepted and stripped, but the resulting atom casing follows TagLib's behaviour rather than being written verbatim. If you rely on a specific lower-cased atom (e.g. Traktor's `initialkey`), verify it in your player before bulk-downloading.
 
 For e.g., Traktor doesn't recognize the track key tag in uppercase, so you have to add:
 ```yaml
