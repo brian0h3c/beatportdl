@@ -56,11 +56,18 @@ const (
 // qualityCompatibilityComment is written to the top of a generated config file
 // to document the quality values and which Pioneer DJ / AlphaTheta hardware can
 // play each one.
-const qualityCompatibilityComment = `# quality options (Pioneer DJ / AlphaTheta player compatibility):
-#   lossless    44.1 kHz FLAC   rekordbox + modern players (CDJ-3000, CDJ-2000NXS2, XDJ-XZ/RX3/RR/AZ, OPUS-QUAD); not older CDJs
-#   high        256 kbps AAC    rekordbox + virtually all Pioneer DJ / AlphaTheta gear (incl. older CDJs)
-#   medium      128 kbps AAC    same broad compatibility as high, lower bitrate
-#   medium-hls  128 kbps AAC    same as medium (requires ffmpeg)
+const qualityCompatibilityComment = `# quality -> file type:
+#   lossless     FLAC (.flac)  44.1 kHz
+#   high         AAC  (.m4a)   256 kbps
+#   medium       AAC  (.m4a)   128 kbps
+#   medium-hls   AAC  (.m4a)   128 kbps  (requires ffmpeg)
+#
+# Pioneer DJ / AlphaTheta hardware compatibility, by file type:
+#   FLAC (.flac)  rekordbox (Mac/PC/iOS) + modern players: CDJ-3000, CDJ-2000NXS2,
+#                 XDJ-XZ, XDJ-RX3, XDJ-RX2, XDJ-RR, XDJ-AZ, OPUS-QUAD.
+#                 NOT supported on older players (CDJ-2000NXS, CDJ-900NXS & earlier).
+#   AAC  (.m4a)   rekordbox + virtually all Pioneer DJ / AlphaTheta gear,
+#                 including older CDJs that don't read FLAC.
 #
 # downloads_directory defaults to a "downloads" folder in the current directory
 # (where beatportdl is run) when left empty.
