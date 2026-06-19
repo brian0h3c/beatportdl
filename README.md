@@ -22,9 +22,9 @@ Building & testing
 ---
 > **Prerequisites:** [Go 1.25+](https://go.dev/dl/), and an active [Beatport](https://stream.beatport.com/)/[Beatsource](https://stream.beatsource.com/) plan. [ffmpeg](https://www.ffmpeg.org/download.html) is only needed for the `medium-hls` quality option.
 
-**1. Clone this branch and build**
+**1. Clone and build**
 ```shell
-git clone -b simplify/dedup-and-drop-cgo https://github.com/brian0h3c/beatportdl.git
+git clone https://github.com/brian0h3c/beatportdl.git
 cd beatportdl
 go build ./cmd/beatportdl          # produces ./beatportdl
 ```
@@ -36,9 +36,16 @@ To build every release binary (output in `./bin`), run `make` — see [Building]
 
 **2. First run — create the config**
 
-Run it once and answer the prompts — username, password, downloads directory (press **Enter** to use the current folder), and quality (the menu shows Pioneer DJ / AlphaTheta compatibility). This writes `beatportdl-config.yml`, and on a successful login `beatportdl-credentials.json`:
+Run it once and answer the prompts — username, password, downloads directory (press **Enter** for a `downloads/` folder in the current directory), and quality (the menu shows Pioneer DJ / AlphaTheta compatibility). This writes `beatportdl-config.yml`, and on a successful login `beatportdl-credentials.json`:
 ```shell
 ./beatportdl
+```
+
+A minimal `beatportdl-config.yml` only needs your credentials and quality — everything else uses sensible defaults (downloads land in `./downloads/<name>/`):
+```yaml
+username: your_username
+password: your_password
+quality: lossless
 ```
 
 **3. Download something**
@@ -52,7 +59,17 @@ or run `./beatportdl` with no arguments and type a search query when prompted (a
 ./beatportdl
 Enter url or search query: deadmau5 strobe
 ```
-Tracks, releases, playlists, charts, labels and artists are all supported — just paste the URL. Set `sort_by_context: true` in the config to group downloads into per-release/playlist/chart folders.
+Tracks, releases, playlists, charts, labels and artists are all supported — just paste the URL.
+
+By default, downloads are organized into a `downloads/` folder, then a subfolder named after what you grabbed:
+```
+downloads/
+└── My Playlist/
+    ├── 01. Artist - Track One (Original Mix).flac
+    ├── 02. Artist - Track Two (Original Mix).flac
+    └── ...
+```
+Change the base folder with `downloads_directory`, or set `sort_by_context: false` to download straight into one folder.
 
 **4. Verify the tags and cover art**
 
