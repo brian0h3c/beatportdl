@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,10 +27,11 @@ func Setup() (cfg *config.AppConfig, cachePath string, err error) {
 		fmt.Print("Password: ")
 		password := GetLine()
 		cwd, _ := os.Getwd()
-		fmt.Printf("Downloads directory (press Enter to use the current directory: %s): ", cwd)
+		defaultDir := filepath.Join(cwd, "downloads")
+		fmt.Printf("Downloads directory (press Enter for '%s'): ", defaultDir)
 		downloadsDir := GetLine()
 		if downloadsDir == "" {
-			downloadsDir = cwd
+			downloadsDir = defaultDir
 		}
 
 		cfg := &config.AppConfig{

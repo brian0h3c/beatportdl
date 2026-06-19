@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"unspok3n/beatportdl/internal/validator"
 
 	"gopkg.in/yaml.v2"
@@ -61,8 +62,8 @@ const qualityCompatibilityComment = `# quality options (Pioneer DJ / AlphaTheta 
 #   medium      128 kbps AAC    same broad compatibility as high, lower bitrate
 #   medium-hls  128 kbps AAC    same as medium (requires ffmpeg)
 #
-# downloads_directory defaults to the current directory (where beatportdl is run)
-# when left empty.
+# downloads_directory defaults to a "downloads" folder in the current directory
+# (where beatportdl is run) when left empty.
 
 `
 
@@ -150,7 +151,7 @@ func Parse(filePath string) (*AppConfig, error) {
 		if err != nil {
 			return nil, fmt.Errorf("no downloads directory provided and failed to resolve current directory: %w", err)
 		}
-		config.DownloadsDirectory = cwd
+		config.DownloadsDirectory = filepath.Join(cwd, "downloads")
 	}
 
 	if !validator.PermittedValue(config.TrackExists, SupportedTrackExistsOptions...) {
