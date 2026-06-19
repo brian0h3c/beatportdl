@@ -166,27 +166,23 @@ URL types that are currently supported: **Tracks, Releases, Playlists, Charts, L
 Building
 ---
 Required dependencies:
-* [TagLib](https://github.com/taglib/taglib) >= 2.0
-* [zlib](https://github.com/madler/zlib) >= 1.2.3
-* [Zig C/C++ Toolchain](https://github.com/ziglang/zig) >= 0.14.0
+* [Go](https://go.dev/dl/) >= 1.25
 
-BeatportDL uses [TagLib](https://taglib.org/) C bindings to handle audio metadata and therefore requires [CGO](https://go.dev/wiki/cgo)
+BeatportDL handles audio metadata with [go-taglib](https://github.com/sentriz/go-taglib), which embeds [TagLib](https://taglib.org/) compiled to WebAssembly and runs it via [wazero](https://github.com/tetratelabs/wazero). There is **no CGO and no C toolchain required**, so building and cross-compilation are plain Go.
 
-Makefile is adapted for cross-compilation and uses [Zig toolchain](https://github.com/ziglang/zig)
-
-To compile BeatportDL with Zig using Makefile, you must specify the paths to the C/C++ libraries folder and headers folder for the desired OS and architecture with `-L` (for libraries) and `-I` (for headers) flags using environment variables: `MACOS_ARM64_LIB_PATH`, `MACOS_AMD64_LIB_PATH`, `LINUX_AMD64_LIB_PATH`, `LINUX_ARM64_LIB_PATH`, `WINDOWS_AMD64_LIB_PATH`
-
-One line example *(for unix and unix-like os)*
+Build for your current platform:
 ```shell
-MACOS_ARM64_LIB_PATH="-L/usr/local/lib -I/usr/local/include" \
-make darwin-arm64
+go build ./cmd/beatportdl
 ```
 
-You can also create an `.env` file in the project folder and specify all environment variables in it:
+The Makefile builds release binaries for every supported platform (output in `./bin`):
+```shell
+make                # all targets
+make darwin-arm64
+make darwin-amd64
+make linux-amd64
+make linux-arm64
+make windows-amd64
 ```
-MACOS_ARM64_LIB_PATH=-L/libraries/for/macos-arm64 -I/headers/for/macos-arm64
-MACOS_AMD64_LIB_PATH=-L/libraries/for/macos-amd64 -I/headers/for/macos-amd64
-LINUX_AMD64_LIB_PATH=-L/libraries/for/linux-amd64 -I/headers/for/linux-amd64
-LINUX_ARM64_LIB_PATH=-L/libraries/for/linux-arm64 -I/headers/for/linux-arm64
-WINDOWS_AMD64_LIB_PATH=-L/libraries/for/windows-amd64 -I/headers/for/windows-amd64
-```
+
+> **Note:** the `medium-hls` quality option requires [ffmpeg](https://www.ffmpeg.org/download.html) at runtime to remux the downloaded stream segments.
