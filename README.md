@@ -8,11 +8,13 @@ Beatport & Beatsource downloader (FLAC, AAC)
 
 What's new in this fork
 ---
-This fork keeps BeatportDL's behaviour and configuration **identical**, while making it far easier to build and trimming the codebase:
+This fork makes BeatportDL **far easier to build**, trims the codebase, and adds a couple of quality-of-life touches — without changing how downloading or tagging work:
 
 - **No CGO, no C toolchain.** Audio tagging now uses [go-taglib](https://github.com/sentriz/go-taglib) — the real [TagLib](https://taglib.org/) library compiled to WebAssembly and run via [wazero](https://github.com/tetratelabs/wazero) — instead of CGO bindings. You no longer need TagLib, zlib or the Zig toolchain installed: `go build` and cross-compilation are pure Go. Tags are still produced by TagLib, so files are tagged exactly as before.
 - **One-command cross-compilation.** The Makefile is now plain `GOOS`/`GOARCH` builds — a single `make` produces binaries for macOS, Linux and Windows with no per-platform C library paths.
 - **Leaner download code.** The chart, playlist and artist download paths shared a lot of duplicated logic; they now run through a single shared helper (~165 fewer lines), which keeps behaviour consistent across link types and reduces the surface for bugs.
+- **Downloads default to the current folder.** If `downloads_directory` isn't set, BeatportDL saves to the directory you run it from instead of prompting for a path. Set `downloads_directory` in the config to override.
+- **Quality picker shows DJ-gear compatibility.** The interactive setup menu, the generated config file, and the quality table in [Setup](#setup) all note which Pioneer DJ / AlphaTheta players support each option — FLAC for modern players (CDJ-3000, CDJ-2000NXS2, XDJ-XZ/RX3/RR/AZ, OPUS-QUAD) and AAC for the widest compatibility.
 
 > **Requirements changed:** building now needs **Go 1.25+**. The advanced M4A `_raw` tag option now goes through TagLib's standard property mapping; the default config doesn't use it, so most setups are unaffected.
 
@@ -34,7 +36,7 @@ To build every release binary (output in `./bin`), run `make` — see [Building]
 
 **2. First run — create the config**
 
-Run it once and answer the prompts (username, password, downloads directory, quality). This writes `beatportdl-config.yml`, and on a successful login `beatportdl-credentials.json`:
+Run it once and answer the prompts — username, password, downloads directory (press **Enter** to use the current folder), and quality (the menu shows Pioneer DJ / AlphaTheta compatibility). This writes `beatportdl-config.yml`, and on a successful login `beatportdl-credentials.json`:
 ```shell
 ./beatportdl
 ```
