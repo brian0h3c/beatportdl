@@ -52,6 +52,20 @@ const (
 	DefaultCoverSize = "1400x1400"
 )
 
+// qualityCompatibilityComment is written to the top of a generated config file
+// to document the quality values and which Pioneer DJ / AlphaTheta hardware can
+// play each one.
+const qualityCompatibilityComment = `# quality options (Pioneer DJ / AlphaTheta player compatibility):
+#   lossless    44.1 kHz FLAC   rekordbox + modern players (CDJ-3000, CDJ-2000NXS2, XDJ-XZ/RX3/RR/AZ, OPUS-QUAD); not older CDJs
+#   high        256 kbps AAC    rekordbox + virtually all Pioneer DJ / AlphaTheta gear (incl. older CDJs)
+#   medium      128 kbps AAC    same broad compatibility as high, lower bitrate
+#   medium-hls  128 kbps AAC    same as medium (requires ffmpeg)
+#
+# downloads_directory defaults to the current directory (where beatportdl is run)
+# when left empty.
+
+`
+
 var (
 	SupportedTrackExistsOptions = []string{
 		"error",
@@ -131,7 +145,11 @@ func Parse(filePath string) (*AppConfig, error) {
 	}
 
 	if config.DownloadsDirectory == "" {
-		return nil, fmt.Errorf("no downloads directory provided")
+		cwd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("no downloads directory provided and failed to resolve current directory: %w", err)
+		}
+		config.DownloadsDirectory = cwd
 	}
 
 	if !validator.PermittedValue(config.TrackExists, SupportedTrackExistsOptions...) {
@@ -156,6 +174,10 @@ func (c *AppConfig) Save(filePath string) error {
 		return fmt.Errorf("create file: %w", err)
 	}
 	defer file.Close()
+
+	if _, err := file.WriteString(qualityCompatibilityComment); err != nil {
+		return fmt.Errorf("write config header: %w", err)
+	}
 
 	encoder := yaml.NewEncoder(file)
 	if err := encoder.Encode(&c); err != nil {

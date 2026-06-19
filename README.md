@@ -122,7 +122,11 @@ Download quality options, per Beatport/Beatsource subscription type:
 | `medium`     | 128 kbps AAC                                                                                                 | Advanced / Beatsource Pro+     |                                                                         |
 | `high`       | 256 kbps AAC                                                                                                 | Professional / Beatsource Pro+ |                                                                         |
 | `lossless`   | 44.1 kHz FLAC                                                                                                | Professional / Beatsource Pro+ |                                                                         |
+**Pioneer DJ / AlphaTheta player compatibility:**
+* **`lossless` (FLAC)** — highest quality. Plays in rekordbox (Mac/PC/iOS) and on modern standalone players: **CDJ-3000, CDJ-2000NXS2, XDJ-XZ, XDJ-RX3/RX2, XDJ-RR, XDJ-AZ, OPUS-QUAD**. Older players (CDJ-2000NXS / CDJ-900NXS and earlier) **don't read FLAC** — use AAC for those.
+* **`high` / `medium` / `medium-hls` (AAC / `.m4a`)** — play in rekordbox and **virtually all** Pioneer DJ / AlphaTheta gear, including older CDJs that don't support FLAC. Use `high` for the best AAC quality.
 
+> If you're playing off USB on a standalone CDJ/XDJ, you still analyze and export the tracks with **rekordbox** first. rekordbox itself supports both FLAC and AAC.
 Available `track_exists` options:
 * `error` Log error and skip
 * `skip` Skip silently

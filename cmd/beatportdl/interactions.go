@@ -25,8 +25,12 @@ func Setup() (cfg *config.AppConfig, cachePath string, err error) {
 		username := GetLine()
 		fmt.Print("Password: ")
 		password := GetLine()
-		fmt.Print("Downloads directory: ")
+		cwd, _ := os.Getwd()
+		fmt.Printf("Downloads directory (press Enter to use the current directory: %s): ", cwd)
 		downloadsDir := GetLine()
+		if downloadsDir == "" {
+			downloadsDir = cwd
+		}
 
 		cfg := &config.AppConfig{
 			Username:           username,
@@ -34,7 +38,11 @@ func Setup() (cfg *config.AppConfig, cachePath string, err error) {
 			DownloadsDirectory: downloadsDir,
 		}
 
-		fmt.Println("1. Lossless (44.1 khz FLAC)\n2. High (256 kbps AAC)\n3. Medium (128 kbps AAC)\n4. Medium HLS (128 kbps AAC)")
+		fmt.Println("Download quality (Pioneer DJ / AlphaTheta compatibility):")
+		fmt.Println("  1. Lossless    44.1 kHz FLAC   rekordbox + modern players (CDJ-3000, CDJ-2000NXS2, XDJ-XZ/RX3/RR/AZ, OPUS-QUAD); not older CDJs")
+		fmt.Println("  2. High        256 kbps AAC    rekordbox + virtually all Pioneer DJ / AlphaTheta gear (incl. older CDJs)")
+		fmt.Println("  3. Medium      128 kbps AAC    same broad compatibility as High, lower bitrate")
+		fmt.Println("  4. Medium HLS  128 kbps AAC    same as Medium (requires ffmpeg)")
 		for {
 			fmt.Print("Quality: ")
 			qualityNumber := GetLine()
